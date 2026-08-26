@@ -181,6 +181,14 @@ jobs:
           sudo chmod +x "$CHROOT_DIR/tmp/welcome.sh"
           sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE"                 SRC_DIR="/tmp/hyggshi-welcome-src" /tmp/welcome.sh 2>&1 | tee welcome-debug.log
 
+      - name: Verify Hyggshi Welcome
+        if: ${{ env.WELCOME_WIZARD == 'true' }}
+        run: |
+          set -euo pipefail
+          sudo chroot "$CHROOT_DIR" test -x /usr/bin/hyggshi-welcome
+          sudo chroot "$CHROOT_DIR" test -f /etc/xdg/autostart/hyggshi-welcome.desktop
+          echo "Hyggshi Welcome installed and autostart-enabled."
+
       - name: Install theme automation
         run: |
           set -euo pipefail

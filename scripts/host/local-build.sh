@@ -99,5 +99,18 @@ else
   echo "WELCOME_WIZARD=false — bỏ qua cài Hyggshi Welcome."
 fi
 
+# Fail early if the default Hyggshi Welcome feature was requested but the
+# binary/desktop entry was not installed successfully.
+if [ "$WELCOME_WIZARD" = "true" ]; then
+  if ! sudo chroot build/chroot test -x /usr/bin/hyggshi-welcome; then
+    echo "ERROR: WELCOME_WIZARD=true nhưng /usr/bin/hyggshi-welcome không tồn tại." >&2
+    exit 1
+  fi
+  if ! sudo chroot build/chroot test -f /etc/xdg/autostart/hyggshi-welcome.desktop; then
+    echo "ERROR: Hyggshi Welcome binary có nhưng autostart entry bị thiếu." >&2
+    exit 1
+  fi
+fi
+
 bash scripts/target/branding.sh
 bash scripts/host/build-iso.sh
