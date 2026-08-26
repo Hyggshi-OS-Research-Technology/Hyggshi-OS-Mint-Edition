@@ -1,0 +1,244 @@
+name: Build Hyggshi OS (Linux Mint)
+
+on:
+  workflow_dispatch:
+    inputs:
+      hyggshi_version:
+        description: "Hyggshi OS version"
+        required: false
+        default: "1.0"
+      hyggshi_codename:
+        description: "Hyggshi OS codename"
+        required: false
+        default: "Sen Vàng"
+      desktop:
+        description: "Desktop environment"
+        type: choice
+        options: [cinnamon, xfce, mate, kde, lxqt, gnome]
+        default: cinnamon
+      panel_style:
+        description: "Taskbar style for XFCE"
+        type: choice
+        options: [windows10, classic]
+        default: windows10
+      icon_theme:
+        description: "Icon theme"
+        type: choice
+        options: [papirus, tela, numix, breeze, adwaita]
+        default: papirus
+      username:
+        description: "Default live user"
+        required: false
+        default: hyggshi
+      user_password:
+        description: "Default live user password"
+        required: false
+        default: hyggshi
+      hostname:
+        description: "Hostname"
+        required: false
+        default: hyggshi-os
+      timezone:
+        description: "Timezone"
+        required: false
+        default: Asia/Ho_Chi_Minh
+      feature_flags:
+        description: "Features: browser,office,autologin,autoscale,welcome,theme-daemon,auto-theme"
+        required: false
+        default: browser,autologin,autoscale,welcome,auto-theme
+      extra_packages:
+        description: "Extra apt packages"
+        required: false
+        default: ""
+      build_nexwm:
+        description: "Build NexWM from source"
+        type: boolean
+        default: false
+      release_iso:
+        description: "Attach ISO to GitHub Release"
+        type: boolean
+        default: false
+      debug_mode:
+        description: "Verbose build + debug artifact"
+        type: boolean
+        default: false
+      wallpaper_url:
+        description: "Custom wallpaper URL (optional)"
+        required: false
+        default: ""
+      logo_url:
+        description: "Custom logo URL (optional)"
+        required: false
+        default: ""
+      plymouth_logo_url:
+        description: "Custom Plymouth logo URL (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+env:
+  DISTRO_NAME: Hyggshi OS
+  BASE_DISTRO: linuxmint
+  MINT_VERSION: "22.3"
+  MINT_CODENAME: zena
+  BASE_CODENAME: noble
+  HYGGSHI_VERSION_ID: ${{ inputs.hyggshi_version || '1.0' }}
+  HYGGSHI_CODENAME: ${{ inputs.hyggshi_codename || 'Sen Vàng' }}
+  DE: ${{ inputs.desktop || 'cinnamon' }}
+  PANEL_STYLE: ${{ inputs.panel_style || 'windows10' }}
+  ICON_THEME: ${{ inputs.icon_theme || 'papirus' }}
+  OS_USERNAME: ${{ inputs.username || 'hyggshi' }}
+  OS_PASSWORD: ${{ inputs.user_password || 'hyggshi' }}
+  OS_HOSTNAME: ${{ inputs.hostname || 'hyggshi-os' }}
+  OS_TIMEZONE: ${{ inputs.timezone || 'Asia/Ho_Chi_Minh' }}
+  EXTRA_PACKAGES: ${{ inputs.extra_packages || '' }}
+  BUILD_NEXWM: ${{ inputs.build_nexwm || false }}
+  DEBUG_MODE: ${{ inputs.debug_mode || false }}
+  WALLPAPER_URL: ${{ inputs.wallpaper_url || '' }}
+  LOGO_URL: ${{ inputs.logo_url || '' }}
+  PLYMOUTH_LOGO_URL: ${{ inputs.plymouth_logo_url || '' }}
+  CHROOT_DIR: build/chroot
+  ISO_FILENAME: hyggshi-os-${{ github.run_number }}.iso
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve feature flags
+        shell: bash
+        run: |
+          set -euo pipefail
+          FLAGS=",${{ inputs.feature_flags || 'browser,autologin,autoscale,welcome,auto-theme' }},"
+          has_flag() { case "$FLAGS" in *",$1,"*) echo true ;; *) echo false ;; esac; }
+          {
+            echo "INCLUDE_BROWSER=$(has_flag browser)"
+            echo "INCLUDE_OFFICE=$(has_flag office)"
+            echo "AUTOLOGIN=$(has_flag autologin)"
+            echo "AUTOSCALE_DISPLAY=$(has_flag autoscale)"
+            echo "WELCOME_WIZARD=$(has_flag welcome)"
+            echo "THEME_DAEMON=$(has_flag theme-daemon)"
+            echo "AUTO_THEME=$(has_flag auto-theme)"
+          } >> "$GITHUB_ENV"
+
+      - name: Bootstrap Linux Mint 22.3
+        run: |
+          chmod +x scripts/host/build.sh scripts/base/bootstrap-linuxmint.sh
+          bash scripts/host/build.sh
+
+      - name: Stage configuration and target scripts
+        run: |
+          set -euo pipefail
+          sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-target"
+          sudo cp -a scripts/target/. "$CHROOT_DIR/tmp/hyggshi-target/"
+          sudo cp scripts/target/desktop.sh "$CHROOT_DIR/tmp/desktop.sh"
+          sudo cp scripts/target/kernel-tuning.sh "$CHROOT_DIR/tmp/kernel-tuning.sh"
+          sudo cp scripts/target/fix-cinnamon-tela-persistence.sh "$CHROOT_DIR/tmp/fix-cinnamon-tela-persistence.sh"
+          sudo cp -a config/calamares "$CHROOT_DIR/tmp/calamares"
+          sudo cp -a config/branding/Hyggshi-OS-Installer.png "$CHROOT_DIR/tmp/Hyggshi-OS-Installer.png"
+          sudo cp LICENSE "$CHROOT_DIR/tmp/LICENSE"
+          sudo chmod -R a+rX "$CHROOT_DIR/tmp/hyggshi-target" "$CHROOT_DIR/tmp/calamares"
+
+      - name: Install desktop and base system
+        run: |
+          set -o pipefail
+          sudo chroot "$CHROOT_DIR" env \
+            BASE_DISTRO="$BASE_DISTRO" \
+            MINT_VERSION="$MINT_VERSION" MINT_CODENAME="$MINT_CODENAME" BASE_CODENAME="$BASE_CODENAME" \
+            DE="$DE" EDITION="normal" DEBUG_MODE="$DEBUG_MODE" ICON_THEME="$ICON_THEME" \
+            OS_USERNAME="$OS_USERNAME" OS_PASSWORD="$OS_PASSWORD" OS_HOSTNAME="$OS_HOSTNAME" \
+            OS_TIMEZONE="$OS_TIMEZONE" INCLUDE_BROWSER="$INCLUDE_BROWSER" INCLUDE_OFFICE="$INCLUDE_OFFICE" \
+            EXTRA_PACKAGES="$EXTRA_PACKAGES" AUTOLOGIN="$AUTOLOGIN" AUTOSCALE_DISPLAY="$AUTOSCALE_DISPLAY" \
+            /bin/bash /tmp/desktop.sh 2>&1 | tee install-debug.log
+
+      - name: Build NexWM
+        if: ${{ env.BUILD_NEXWM == 'true' }}
+        run: |
+          set -o pipefail
+          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE"                 /bin/bash /tmp/hyggshi-target/../hyggshi-components-placeholder 2>/dev/null || true
+          sudo cp scripts/components/build-nexwm.sh "$CHROOT_DIR/tmp/build-nexwm.sh"
+          sudo chmod +x "$CHROOT_DIR/tmp/build-nexwm.sh"
+          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" /tmp/build-nexwm.sh 2>&1 | tee nexwm-build-debug.log
+
+      - name: Install Hyggshi packages and apps
+        run: |
+          set -o pipefail
+          sudo mkdir -p "$CHROOT_DIR/tmp/packages/hyggshi"
+          sudo cp -a packages/hyggshi/. "$CHROOT_DIR/tmp/packages/hyggshi/"
+          sudo cp scripts/target/install-ecosystem.sh "$CHROOT_DIR/tmp/install-ecosystem.sh"
+          sudo chmod +x "$CHROOT_DIR/tmp/install-ecosystem.sh"
+          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE"                 APP_DIR="/tmp/packages/hyggshi" /tmp/install-ecosystem.sh 2>&1 | tee ecosystem-debug.log
+
+      - name: Build and install Hyggshi Welcome
+        if: ${{ env.WELCOME_WIZARD == 'true' }}
+        run: |
+          sudo cp -a packages/hyggshi/hyggshi-welcome "$CHROOT_DIR/tmp/hyggshi-welcome-src"
+          sudo cp scripts/target/welcome.sh "$CHROOT_DIR/tmp/welcome.sh"
+          sudo chmod +x "$CHROOT_DIR/tmp/welcome.sh"
+          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE"                 SRC_DIR="/tmp/hyggshi-welcome-src" /tmp/welcome.sh 2>&1 | tee welcome-debug.log
+
+      - name: Install theme automation
+        run: |
+          set -euo pipefail
+          if [ "$THEME_DAEMON" = true ]; then
+            bash scripts/components/make-theme-daemon.sh
+            sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-theme-daemon-src"
+            sudo cp -a packages/hyggshi/hyggshi-theme-daemon/. "$CHROOT_DIR/tmp/hyggshi-theme-daemon-src/"
+            sudo cp scripts/target/theme-daemon.sh "$CHROOT_DIR/tmp/theme-daemon.sh"
+            sudo chmod +x "$CHROOT_DIR/tmp/theme-daemon.sh"
+            sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" SRC_DIR="/tmp/hyggshi-theme-daemon-src" /tmp/theme-daemon.sh
+          elif [ "$AUTO_THEME" = true ]; then
+            bash scripts/components/make-auto-theme.sh
+            sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-theme-src"
+            sudo cp -a packages/hyggshi/hyggshi-theme/. "$CHROOT_DIR/tmp/hyggshi-theme-src/"
+            sudo cp scripts/target/auto-theme.sh "$CHROOT_DIR/tmp/auto-theme.sh"
+            sudo chmod +x "$CHROOT_DIR/tmp/auto-theme.sh"
+            sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" SRC_DIR="/tmp/hyggshi-theme-src" /tmp/auto-theme.sh
+          fi
+
+      - name: Apply Hyggshi branding
+        run: |
+          set -o pipefail
+          bash scripts/target/branding.sh 2>&1 | tee branding-debug.log
+
+      - name: Build bootable ISO
+        run: |
+          chmod +x scripts/host/build-iso.sh
+          bash scripts/host/build-iso.sh
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyggshi-os-iso
+          path: |
+            ${{ env.ISO_FILENAME }}
+            ${{ env.ISO_FILENAME }}.sha256
+          retention-days: 14
+
+      - name: Upload debug logs
+        if: ${{ env.DEBUG_MODE == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyggshi-os-debug
+          path: |
+            install-debug.log
+            nexwm-build-debug.log
+            ecosystem-debug.log
+            welcome-debug.log
+            branding-debug.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: GitHub Release
+        if: ${{ inputs.release_iso == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: hyggshi-os-${{ github.run_number }}
+          name: Hyggshi OS ${{ env.HYGGSHI_VERSION_ID }} build ${{ github.run_number }}
+          files: |
+            ${{ env.ISO_FILENAME }}
+            ${{ env.ISO_FILENAME }}.sha256
