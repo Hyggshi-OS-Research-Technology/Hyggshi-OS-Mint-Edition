@@ -70,3 +70,9 @@ into the ISO by both GitHub Actions and `scripts/host/local-build.sh` by default
 The installed app lives at `/usr/bin/hyggshi-welcome` and uses the system-wide
 `/etc/xdg/autostart/hyggshi-welcome.desktop` entry. The first-run marker is stored
 per user, so the wizard can finish setup without affecting other accounts.
+
+## GitHub Actions
+
+Builds are Mint-only. Run **Build Hyggshi OS (Linux Mint)** from Actions. The workflow defaults to Cinnamon, Hyggshi Auto Theme, and Hyggshi Welcome.
+
+Hyggshi Welcome source is committed at `packages/hyggshi/hyggshi-welcome/` and is built inside the target chroot, so the CI job verifies both `/usr/bin/hyggshi-welcome` and the system-wide autostart entry.

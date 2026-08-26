@@ -1,11 +1,11 @@
 #!/bin/bash
 # auto-theme.sh — cài "hyggshi-theme" (bash + systemd timer, xem
 # scripts/components/make-auto-theme.sh) TỪ SOURCE đã được workflow copy vào $SRC_DIR.
-# Chạy BÊN TRONG chroot (giống welcome.sh/theme-daemon.sh) vì systemd unit
+# Chạy BÊN TRONG chroot (giống welcome.sh) vì systemd unit
 # + script cần nằm trong rootfs của ISO, không phải máy runner CI.
 #
 # KHÔNG CẦN BUILD (không cmake, không compile) — khác hẳn welcome.sh/
-# theme-daemon.sh, đây chỉ là copy file + enable timer, nên script này
+# auto-theme.sh, đây chỉ là copy file + enable timer, nên script này
 # ngắn hơn nhiều và không cần cài/purge công cụ build gì cả.
 set -e
 [ "$DEBUG_MODE" = "true" ] && set -x

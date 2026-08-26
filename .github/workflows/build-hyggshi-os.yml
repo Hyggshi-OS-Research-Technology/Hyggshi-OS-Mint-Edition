@@ -113,7 +113,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          FLAGS=",${{ inputs.feature_flags || 'browser,autologin,autoscale,welcome,auto-theme' }},"
+          FLAGS="${{ inputs.feature_flags || 'browser,autologin,autoscale,welcome,auto-theme' }}"
+          FLAGS=",$FLAGS,"
           has_flag() { case "$FLAGS" in *",$1,"*) echo true ;; *) echo false ;; esac; }
           {
             echo "INCLUDE_BROWSER=$(has_flag browser)"
@@ -124,6 +125,20 @@ jobs:
             echo "THEME_DAEMON=$(has_flag theme-daemon)"
             echo "AUTO_THEME=$(has_flag auto-theme)"
           } >> "$GITHUB_ENV"
+
+      - name: Validate repository layout
+        run: |
+          set -euo pipefail
+          test -f .github/workflows/build-hyggshi-os.yml
+          test -f scripts/host/build.sh
+          test -f scripts/host/build-iso.sh
+          test -f config/calamares/settings.conf
+          test -f packages/hyggshi/hyggshi-welcome/CMakeLists.txt
+          test -f packages/hyggshi/hyggshi-welcome/src/MainWindow.cpp
+          test -f packages/hyggshi/hyggshi-welcome/src/main.cpp
+          test -f packages/hyggshi/hyggshi-welcome/resources/hyggshi-welcome.qrc
+          test -f packages/hyggshi/hyggshi-welcome/packaging/hyggshi-welcome-autostart.desktop
+          echo "Repository layout OK"
 
       - name: Bootstrap Linux Mint 22.3
         run: |
@@ -158,8 +173,7 @@ jobs:
       - name: Build NexWM
         if: ${{ env.BUILD_NEXWM == 'true' }}
         run: |
-          set -o pipefail
-          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE"                 /bin/bash /tmp/hyggshi-target/../hyggshi-components-placeholder 2>/dev/null || true
+          set -euo pipefail
           sudo cp scripts/components/build-nexwm.sh "$CHROOT_DIR/tmp/build-nexwm.sh"
           sudo chmod +x "$CHROOT_DIR/tmp/build-nexwm.sh"
           sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" /tmp/build-nexwm.sh 2>&1 | tee nexwm-build-debug.log
@@ -190,23 +204,14 @@ jobs:
           echo "Hyggshi Welcome installed and autostart-enabled."
 
       - name: Install theme automation
+        if: ${{ env.AUTO_THEME == 'true' }}
         run: |
           set -euo pipefail
-          if [ "$THEME_DAEMON" = true ]; then
-            bash scripts/components/make-theme-daemon.sh
-            sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-theme-daemon-src"
-            sudo cp -a packages/hyggshi/hyggshi-theme-daemon/. "$CHROOT_DIR/tmp/hyggshi-theme-daemon-src/"
-            sudo cp scripts/target/theme-daemon.sh "$CHROOT_DIR/tmp/theme-daemon.sh"
-            sudo chmod +x "$CHROOT_DIR/tmp/theme-daemon.sh"
-            sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" SRC_DIR="/tmp/hyggshi-theme-daemon-src" /tmp/theme-daemon.sh
-          elif [ "$AUTO_THEME" = true ]; then
-            bash scripts/components/make-auto-theme.sh
-            sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-theme-src"
-            sudo cp -a packages/hyggshi/hyggshi-theme/. "$CHROOT_DIR/tmp/hyggshi-theme-src/"
-            sudo cp scripts/target/auto-theme.sh "$CHROOT_DIR/tmp/auto-theme.sh"
-            sudo chmod +x "$CHROOT_DIR/tmp/auto-theme.sh"
-            sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" SRC_DIR="/tmp/hyggshi-theme-src" /tmp/auto-theme.sh
-          fi
+          sudo mkdir -p "$CHROOT_DIR/tmp/hyggshi-theme-src"
+          sudo cp -a packages/hyggshi/hyggshi-theme/. "$CHROOT_DIR/tmp/hyggshi-theme-src/"
+          sudo cp scripts/target/auto-theme.sh "$CHROOT_DIR/tmp/auto-theme.sh"
+          sudo chmod +x "$CHROOT_DIR/tmp/auto-theme.sh"
+          sudo chroot "$CHROOT_DIR" env DEBUG_MODE="$DEBUG_MODE" SRC_DIR="/tmp/hyggshi-theme-src" /tmp/auto-theme.sh
 
       - name: Apply Hyggshi branding
         run: |

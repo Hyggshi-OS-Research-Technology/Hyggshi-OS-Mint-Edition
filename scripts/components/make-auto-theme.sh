@@ -1,6 +1,6 @@
 #!/bin/bash
 # make-auto-theme.sh — sinh project "hyggshi-theme": bản thay thế nhẹ cho
-# hyggshi-theme-daemon (C++/libxfconf, xem scripts/components/make-theme-daemon.sh).
+# legacy Hyggshi theme daemon.
 # Thay vì 1 daemon chạy nền liên tục link libxfconf, đây chỉ là 1 SCRIPT
 # BASH được systemd TIMER gọi định kỳ (mặc định mỗi 5 phút) rồi thoát —
 # không cần libxfconf-0-dev/glib2.0-dev để build (không cần build gì cả),
@@ -38,7 +38,7 @@ mkdir -p "$APP_DIR"
 # ---------------------------------------------------------------------------
 cat > "$APP_DIR/hyggshi-auto-theme" <<'SCRIPT'
 #!/bin/bash
-# hyggshi-auto-theme — thay thế hyggshi-theme-daemon (C++/libxfconf) bằng
+# hyggshi-auto-theme — thay thế legacy Hyggshi theme daemon bằng
 # 1 script bash chạy ĐỊNH KỲ qua systemd timer (không chạy nền liên tục,
 # gần như 0 RAM lúc rảnh). Mỗi lần chạy:
 #   1. Đọc config (system-wide /etc/hyggshi/theme.conf, user override
@@ -214,8 +214,7 @@ CONFEOF
 cat > "$APP_DIR/README.md" <<'MDEOF'
 # hyggshi-theme (bash + systemd timer)
 
-Bản thay thế nhẹ cho `hyggshi-theme-daemon` (C++/libxfconf, xem
-`packages/hyggshi/hyggshi-theme-daemon/`). Thay vì 1 daemon chạy nền liên
+Bản theme tự động nhẹ của Hyggshi OS, không cần daemon C++. Thay vì 1 daemon chạy nền liên
 tục, đây chỉ là 1 script bash được **systemd timer** gọi mỗi 5 phút rồi
 thoát — không cần build gì cả (không cần `libxfconf-0-dev`/`glib2.0-dev`),
 RAM lúc rảnh gần như bằng 0.

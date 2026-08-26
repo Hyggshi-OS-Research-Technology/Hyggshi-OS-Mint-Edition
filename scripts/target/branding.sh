@@ -65,7 +65,7 @@ else
 fi
 
 # car-light.png / car-Dark.png: wallpaper riêng cho theme Sáng/Tối, được
-# hyggshi-welcome (make-welcome.sh) áp tự động khi user chọn theme ở trang
+# hyggshi-welcome (packages/hyggshi/hyggshi-welcome/) áp tự động khi user chọn theme ở trang
 # "Chọn giao diện". Copy sẵn vào đây (không phụ thuộc cmake install của app)
 # để có mặt ngay cả khi app hyggshi-welcome chưa từng được build/cài riêng.
 for CAR_FILE in car-light.png car-Dark.png car-auto.png; do

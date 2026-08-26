@@ -1,7 +1,6 @@
 # hyggshi-theme (bash + systemd timer)
 
-Bản thay thế nhẹ cho `hyggshi-theme-daemon` (C++/libxfconf, xem
-`packages/hyggshi/hyggshi-theme-daemon/`). Thay vì 1 daemon chạy nền liên
+Bản theme tự động nhẹ của Hyggshi OS, không cần daemon C++. Thay vì 1 daemon chạy nền liên
 tục, đây chỉ là 1 script bash được **systemd timer** gọi mỗi 5 phút rồi
 thoát — không cần build gì cả (không cần `libxfconf-0-dev`/`glib2.0-dev`),
 RAM lúc rảnh gần như bằng 0.

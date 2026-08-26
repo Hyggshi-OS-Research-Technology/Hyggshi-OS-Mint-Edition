@@ -801,8 +801,7 @@ apt-get install -y memtest86+ || \
 
 echo "===== Công cụ dev cơ bản (cmake, gcc) ====="
 # Cần để build các component C++ tự sinh trong repo ngay TRÊN máy đã cài
-# đặt (hyggshi-welcome, hyggshi-theme-daemon — xem scripts/components/make-welcome.sh,
-# make-theme-daemon.sh), không chỉ lúc build ISO trên CI. Best-effort (không
+# đặt (hyggshi-welcome — xem packages/hyggshi/hyggshi-welcome/,), không chỉ lúc build ISO trên CI. Best-effort (không
 # fatal): thiếu 1 trong 2 gói này không nên làm hỏng cả build ISO.
 for pkg in cmake gcc; do
   if ! apt-get install -y "$pkg"; then

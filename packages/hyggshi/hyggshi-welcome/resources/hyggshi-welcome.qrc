@@ -1,10 +1,7 @@
 <RCC>
   <qresource prefix="/">
-    <file>icons/logo.png</file>
-    <file>icons/theme-light.png</file>
-    <file>icons/theme-dark.png</file>
-    <file>icons/theme-auto.png</file>
-    <file>icons/discord.png</file>
-    <file>icons/x.png</file>
+    <file alias="images/logo.png">icons/logo.png</file>
+    <file alias="images/theme-light.png">icons/theme-light.png</file>
+    <file alias="images/theme-dark.png">icons/theme-dark.png</file>
   </qresource>
 </RCC>
