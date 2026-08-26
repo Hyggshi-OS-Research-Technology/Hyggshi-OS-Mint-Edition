@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Hyggshi Welcome
+Name[vi]=Chào mừng Hyggshi
+Comment=Tự động mở Hyggshi Welcome cho mỗi user chưa hoàn tất thiết lập lần đầu
+Exec=hyggshi-welcome
+TryExec=hyggshi-welcome
+Icon=hyggshi-welcome
+Terminal=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=4
+X-KDE-autostart-after=panel
