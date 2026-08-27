@@ -1,11 +1,12 @@
 #!/bin/bash
-# Build an Ubuntu ISO locally or inside the supplied Docker image.
-# Native-container builders remain available through Actions.
+# Build a Debian, Ubuntu, or Linux Mint ISO locally or inside the supplied
+# Docker image. Native-container builders remain available through Actions.
 set -Eeuo pipefail
 
-: "${BASE_DISTRO:=ubuntu}"
-: "${UBUNTU_CODENAME:=noble}"
-: "${BASE_CODENAME:=${UBUNTU_CODENAME}}"
+: "${BASE_DISTRO:=linuxmint}"
+: "${MINT_VERSION:=22.3}"
+: "${MINT_CODENAME:=zena}"
+: "${BASE_CODENAME:=noble}"
 
 : "${DISTRO_NAME:=Hyggshi OS}"
 : "${HYGGSHI_VERSION_ID:=1.0}"
@@ -33,8 +34,8 @@ if ! printf '%s' "$HYGGSHI_VERSION_ID" | grep -Eq '^[0-9]+([.][0-9]+)*$'; then
   exit 2
 fi
 
-if [ "$BASE_DISTRO" != "ubuntu" ]; then
-  echo "Only Ubuntu builds are supported." >&2
+if [ "$BASE_DISTRO" != "linuxmint" ]; then
+  echo "Only Linux Mint builds are supported." >&2
   exit 2
 fi
 
@@ -43,7 +44,7 @@ if [ "$(id -u)" -ne 0 ] && ! command -v sudo >/dev/null; then
   exit 1
 fi
 
-export BASE_DISTRO UBUNTU_CODENAME DISTRO_NAME HYGGSHI_VERSION_ID EDITION BASE_CODENAME
+export BASE_DISTRO MINT_VERSION MINT_CODENAME DISTRO_NAME HYGGSHI_VERSION_ID EDITION BASE_CODENAME
 export DE PANEL_STYLE ICON_THEME OS_USERNAME OS_PASSWORD OS_HOSTNAME OS_TIMEZONE
 export INCLUDE_BROWSER INCLUDE_OFFICE EXTRA_PACKAGES DEBUG_MODE ISO_FILENAME
 export WALLPAPER_URL LOGO_URL PLYMOUTH_LOGO_URL WELCOME_WIZARD HYGGSHI_CODENAME
@@ -67,7 +68,7 @@ sudo cp config/branding/Hyggshi-OS-Installer.png build/chroot/tmp/Hyggshi-OS-Ins
 sudo chmod 0644 build/chroot/tmp/Hyggshi-OS-Installer.png
 sudo chmod +x build/chroot/tmp/desktop.sh
 sudo chroot build/chroot env \
-  BASE_DISTRO="$BASE_DISTRO" UBUNTU_CODENAME="$UBUNTU_CODENAME" BASE_CODENAME="$BASE_CODENAME" DE="$DE" EDITION="$EDITION" DEBUG_MODE="$DEBUG_MODE" \
+  BASE_DISTRO="$BASE_DISTRO" MINT_VERSION="$MINT_VERSION" MINT_CODENAME="$MINT_CODENAME" BASE_CODENAME="$BASE_CODENAME" DE="$DE" EDITION="$EDITION" DEBUG_MODE="$DEBUG_MODE" \
   ICON_THEME="$ICON_THEME" OS_USERNAME="$OS_USERNAME" OS_PASSWORD="$OS_PASSWORD" \
   OS_HOSTNAME="$OS_HOSTNAME" OS_TIMEZONE="$OS_TIMEZONE" \
   INCLUDE_BROWSER="$INCLUDE_BROWSER" INCLUDE_OFFICE="$INCLUDE_OFFICE" \

@@ -70,7 +70,7 @@ void MainWindow::buildUi() {
 
     pages_->addWidget(makePage(
         QStringLiteral("Welcome"),
-        QStringLiteral("Hyggshi OS is an Ubuntu based desktop system customized for the Hyggshi ecosystem.\n\nThis assistant will guide you through a few optional preferences. You can skip everything and configure the system later.")));
+        QStringLiteral("Hyggshi OS is a Linux Mint based desktop system customized for the Hyggshi ecosystem.\n\nThis assistant will guide you through a few optional preferences. You can skip everything and configure the system later.")));
 
     auto *appearance = new QWidget;
     auto *appearanceLayout = new QVBoxLayout(appearance);

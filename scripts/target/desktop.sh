@@ -376,7 +376,7 @@ echo "===== Firmware / driver phần cứng (wifi, GPU, virtio...) ====="
 # thực sự được cài vào ROOTFS và initramfs phải được rebuild SAU CÙNG; nếu chỉ
 # cài package mà giữ initrd cũ thì Plymouth/KMS có thể vẫn boot bằng fallback
 # và máy thật có thể mất Wi-Fi/GPU firmware.
-# Install the firmware bundle and extra generic modules.
+# Linux Mint is Ubuntu-based: install the firmware bundle and extra generic modules.
 apt-get install -y linux-firmware
 KERNEL_FLAVOUR=$(dpkg-query -W -f='${Package}\n' 'linux-image-*-generic' 'linux-image-*-lowlatency' 2>/dev/null | sed -E 's/^linux-image-[0-9.]+-[0-9]+-//' | sort -u | head -n1 || true)
 : "${KERNEL_FLAVOUR:=generic}"
@@ -728,7 +728,7 @@ fi
 # trình duyệt / office (tùy chọn)
 if [ "$INCLUDE_BROWSER" = "true" ]; then
   if true; then
-    # Ubuntu 26.04/Resolute cung cấp `firefox` como
+    # Ubuntu 26.04/Resolute (và Ubuntu-based Mint) cung cấp `firefox` como
     # snap-transition package. apt cài gói đó sẽ chạy preinst của snapd,
     # nhưng trong chroot build không có snapd/systemd/dev/tty đầy đủ:
     #   cannot create /dev/tty: No such device or address
@@ -1429,10 +1429,10 @@ fi
 
 # ============================================================
 # Edition (kernel tuning) — CHỈ áp dụng cho Debian, theo đúng yêu cầu
-# ("arch và debian thêm tuỳ chọn chỉnh thông số kernel"). Ubuntu chạy
+# ("arch và debian thêm tuỳ chọn chỉnh thông số kernel"). Ubuntu/Mint chạy
 # chung script này nhưng không áp dụng, để không đổi hành vi đã ổn định.
 # ============================================================
-# Ubuntu uses one standard tuning profile; edition-specific Debian/Arch tuning is removed.
+# Linux Mint uses one standard tuning profile; edition-specific Debian/Arch tuning is removed.
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 

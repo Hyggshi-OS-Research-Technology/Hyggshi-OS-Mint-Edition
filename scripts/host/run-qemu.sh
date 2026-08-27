@@ -13,7 +13,7 @@ SMP="${QEMU_SMP:-4}"
 
 if ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
   echo "ERROR: qemu-system-x86_64 is not installed." >&2
-  echo "Ubuntu: sudo apt install qemu-system-x86 qemu-utils" >&2
+  echo "Ubuntu/Mint: sudo apt install qemu-system-x86 qemu-utils" >&2
   exit 1
 fi
 

@@ -63,7 +63,7 @@ EOF
   esac
 }
 
-# Gói apt thêm theo edition (Debian/Ubuntu) — cách nhau bằng dấu cách.
+# Gói apt thêm theo edition (Debian/Ubuntu/Mint) — cách nhau bằng dấu cách.
 hyggshi_edition_packages_apt() {
   local edition="${1:-normal}"
   case "$edition" in
