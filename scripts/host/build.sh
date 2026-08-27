@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Host-side bootstrap for Hyggshi OS. Mint only.
+# Host-side bootstrap for Hyggshi OS. Ubuntu only.
 set -Eeuo pipefail
 [ "${DEBUG_MODE:-false}" = "true" ] && set -x
 
 : "${CHROOT_DIR:=build/chroot}"
 : "${GITHUB_ENV:=build/build.env}"
-: "${MINT_VERSION:=22.3}"
-: "${MINT_CODENAME:=zena}"
-: "${BASE_CODENAME:=noble}"
-export CHROOT_DIR GITHUB_ENV MINT_VERSION MINT_CODENAME BASE_CODENAME
+: "${UBUNTU_CODENAME:=noble}"
+: "${BASE_CODENAME:=${UBUNTU_CODENAME}}"
+export CHROOT_DIR GITHUB_ENV UBUNTU_CODENAME BASE_CODENAME
 
 mkdir -p "$(dirname "$GITHUB_ENV")" "$CHROOT_DIR"
 : > "$GITHUB_ENV"
@@ -22,4 +21,4 @@ echo "===== Install host build dependencies ====="
 sudo apt-get update
 sudo apt-get install -y       debootstrap squashfs-tools xorriso isolinux syslinux-efi       grub-pc-bin grub-efi-amd64-bin grub-common mtools dosfstools       initramfs-tools live-boot
 
-bash "$(dirname "$0")/../base/bootstrap-linuxmint.sh"
+bash "$(dirname "$0")/../base/bootstrap-ubuntu.sh"

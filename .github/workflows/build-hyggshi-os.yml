@@ -1,4 +1,4 @@
-name: Build Hyggshi OS (Linux Mint)
+name: Build Hyggshi OS (Ubuntu)
 
 on:
   workflow_dispatch:
@@ -80,9 +80,8 @@ permissions:
 
 env:
   DISTRO_NAME: Hyggshi OS
-  BASE_DISTRO: linuxmint
-  MINT_VERSION: "22.3"
-  MINT_CODENAME: zena
+  BASE_DISTRO: ubuntu
+  UBUNTU_CODENAME: noble
   BASE_CODENAME: noble
   HYGGSHI_VERSION_ID: ${{ inputs.hyggshi_version || '1.0' }}
   HYGGSHI_CODENAME: ${{ inputs.hyggshi_codename || 'Sen Vàng' }}
@@ -140,9 +139,9 @@ jobs:
           test -f packages/hyggshi/hyggshi-welcome/packaging/hyggshi-welcome-autostart.desktop
           echo "Repository layout OK"
 
-      - name: Bootstrap Linux Mint 22.3
+      - name: Bootstrap Ubuntu
         run: |
-          chmod +x scripts/host/build.sh scripts/base/bootstrap-linuxmint.sh
+          chmod +x scripts/host/build.sh scripts/base/bootstrap-ubuntu.sh
           bash scripts/host/build.sh
 
       - name: Stage configuration and target scripts
@@ -163,7 +162,7 @@ jobs:
           set -o pipefail
           sudo chroot "$CHROOT_DIR" env \
             BASE_DISTRO="$BASE_DISTRO" \
-            MINT_VERSION="$MINT_VERSION" MINT_CODENAME="$MINT_CODENAME" BASE_CODENAME="$BASE_CODENAME" \
+            UBUNTU_CODENAME="$UBUNTU_CODENAME" BASE_CODENAME="$BASE_CODENAME" \
             DE="$DE" EDITION="normal" DEBUG_MODE="$DEBUG_MODE" ICON_THEME="$ICON_THEME" \
             OS_USERNAME="$OS_USERNAME" OS_PASSWORD="$OS_PASSWORD" OS_HOSTNAME="$OS_HOSTNAME" \
             OS_TIMEZONE="$OS_TIMEZONE" INCLUDE_BROWSER="$INCLUDE_BROWSER" INCLUDE_OFFICE="$INCLUDE_OFFICE" \

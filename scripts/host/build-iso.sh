@@ -195,7 +195,7 @@ fi
 
 echo "===== Build bootable ISO with grub ====="
 # Kernel cmdline thêm theo Edition — CHỈ áp dụng cho Debian (đúng phạm vi
-# yêu cầu "arch và debian thêm tuỳ chọn chỉnh thông số kernel"); Ubuntu/Mint
+# yêu cầu "arch và debian thêm tuỳ chọn chỉnh thông số kernel"); Ubuntu
 # giữ nguyên "quiet splash" mặc định như trước.
 KERNEL_CMDLINE_EXTRA="quiet splash"
 if false; then

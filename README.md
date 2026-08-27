@@ -1,14 +1,14 @@
 # Hyggshi OS
 
-Hyggshi OS is a custom Linux distribution built on **Linux Mint 22.3 “Zena”** (Ubuntu Noble base).
+Hyggshi OS is a custom Linux distribution built directly on **Ubuntu 24.04 “Noble Numbat”**.
 
 ## Build model
 
-The repository is intentionally Mint-only. Legacy builders for Debian, Ubuntu, Alpine, Arch and Fedora have been removed.
+The repository is intentionally Ubuntu-only. Legacy builders for Debian, Linux Mint, Alpine, Arch and Fedora have been removed.
 
 - `config/` — Calamares and Hyggshi branding configuration
 - `packages/hyggshi/` — Hyggshi applications, themes and bundled packages
-- `scripts/base/` — Linux Mint rootfs bootstrap
+- `scripts/base/` — Ubuntu rootfs bootstrap
 - `scripts/target/` — scripts executed inside the target root filesystem
 - `scripts/components/` — optional source/build helpers such as NexWM and Welcome
 - `scripts/host/` — host-side build and ISO packaging scripts
@@ -17,13 +17,13 @@ The repository is intentionally Mint-only. Legacy builders for Debian, Ubuntu, A
 
 ## Base OS
 
-Current base: **Linux Mint 22.3 “Zena”**, Cinnamon/Xfce/MATE/KDE/LXQt/GNOME selectable at build time, while the base repository remains Linux Mint-only.
+Current base: **Ubuntu 24.04 “Noble Numbat”**, Cinnamon/Xfce/MATE/KDE/LXQt/GNOME selectable at build time, while the base repository remains Ubuntu-only.
 
-The Linux Mint release list currently identifies 22.3 as the newest supported Mint release, with support through April 2029. See the official release list: https://www.linuxmint.com/download_all.php
+Ubuntu 24.04 LTS is supported through April 2029. See the official release notes: https://wiki.ubuntu.com/NobleNumbat/ReleaseNotes
 
 ## GitHub Actions
 
-Open **Actions → Build Hyggshi OS (Linux Mint) → Run workflow**. Customize desktop, branding URLs, feature flags, optional packages and NexWM build settings, then download the generated ISO from the workflow artifacts.
+Open **Actions → Build Hyggshi OS (Ubuntu) → Run workflow**. Customize desktop, branding URLs, feature flags, optional packages and NexWM build settings, then download the generated ISO from the workflow artifacts.
 
 ## Local build
 
@@ -73,6 +73,6 @@ per user, so the wizard can finish setup without affecting other accounts.
 
 ## GitHub Actions
 
-Builds are Mint-only. Run **Build Hyggshi OS (Linux Mint)** from Actions. The workflow defaults to Cinnamon, Hyggshi Auto Theme, and Hyggshi Welcome.
+Builds are Ubuntu-only. Run **Build Hyggshi OS (Ubuntu)** from Actions. The workflow defaults to Cinnamon, Hyggshi Auto Theme, and Hyggshi Welcome.
 
 Hyggshi Welcome source is committed at `packages/hyggshi/hyggshi-welcome/` and is built inside the target chroot, so the CI job verifies both `/usr/bin/hyggshi-welcome` and the system-wide autostart entry.
