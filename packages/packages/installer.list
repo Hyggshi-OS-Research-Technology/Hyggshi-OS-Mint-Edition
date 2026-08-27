@@ -7,3 +7,10 @@ grub-common
 efibootmgr
 parted
 dosfstools
+# fdisk: từ Ubuntu 24.04 (noble), sfdisk/fdisk/cfdisk KHÔNG còn nằm trong
+# util-linux nữa mà tách ra gói riêng "fdisk". Calamares dùng backend
+# KPMCore "pmsfdiskbackendplugin" (gọi lệnh sfdisk) để liệt kê ổ đĩa —
+# thiếu gói này thì partition module luôn thấy "0 devices detected" dù
+# kernel/lsblk vẫn thấy ổ đĩa bình thường, dẫn tới lỗi "There are no
+# partitions to install on." trên trang Welcome.
+fdisk
