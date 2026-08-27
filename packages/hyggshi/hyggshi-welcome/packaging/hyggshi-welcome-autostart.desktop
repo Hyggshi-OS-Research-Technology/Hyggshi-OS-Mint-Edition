@@ -1,8 +1,13 @@
 [Desktop Entry]
 Type=Application
 Name=Hyggshi Welcome
-Comment=First-run setup assistant for Hyggshi OS
-Exec=sh -c 'test -n "$HYGGSHI_WELCOME_FORCE" || test ! -f "$HOME/.config/hyggshi/welcome-shown"; exec /usr/bin/hyggshi-welcome'
-OnlyShowIn=Cinnamon;X-Cinnamon-UsesNotifications=true;
+Name[vi]=Chào mừng Hyggshi
+Comment=Tự động mở Hyggshi Welcome cho mỗi user chưa hoàn tất thiết lập lần đầu
+Exec=hyggshi-welcome
+TryExec=hyggshi-welcome
+Icon=hyggshi-welcome
+Terminal=false
+NoDisplay=false
 X-GNOME-Autostart-enabled=true
-NoDisplay=true
+X-GNOME-Autostart-Delay=4
+X-KDE-autostart-after=panel

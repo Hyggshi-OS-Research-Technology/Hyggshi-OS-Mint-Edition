@@ -138,6 +138,10 @@ jobs:
           test -f packages/hyggshi/hyggshi-welcome/src/main.cpp
           test -f packages/hyggshi/hyggshi-welcome/resources/hyggshi-welcome.qrc
           test -f packages/hyggshi/hyggshi-welcome/packaging/hyggshi-welcome-autostart.desktop
+          test -f packages/packages/installer.list
+          test -f packages/packages/devtools.list
+          test -f packages/packages/vietnamese-input.list
+          test -f packages/packages/desktop-xfce.list
           echo "Repository layout OK"
 
       - name: Bootstrap Linux Mint 22.3
@@ -156,7 +160,9 @@ jobs:
           sudo cp -a config/calamares "$CHROOT_DIR/tmp/calamares"
           sudo cp -a config/branding/Hyggshi-OS-Installer.png "$CHROOT_DIR/tmp/Hyggshi-OS-Installer.png"
           sudo cp LICENSE "$CHROOT_DIR/tmp/LICENSE"
-          sudo chmod -R a+rX "$CHROOT_DIR/tmp/hyggshi-target" "$CHROOT_DIR/tmp/calamares"
+          sudo mkdir -p "$CHROOT_DIR/tmp/pkglists"
+          sudo cp -a packages/packages/. "$CHROOT_DIR/tmp/pkglists/"
+          sudo chmod -R a+rX "$CHROOT_DIR/tmp/hyggshi-target" "$CHROOT_DIR/tmp/calamares" "$CHROOT_DIR/tmp/pkglists"
 
       - name: Install desktop and base system
         run: |
@@ -168,6 +174,7 @@ jobs:
             OS_USERNAME="$OS_USERNAME" OS_PASSWORD="$OS_PASSWORD" OS_HOSTNAME="$OS_HOSTNAME" \
             OS_TIMEZONE="$OS_TIMEZONE" INCLUDE_BROWSER="$INCLUDE_BROWSER" INCLUDE_OFFICE="$INCLUDE_OFFICE" \
             EXTRA_PACKAGES="$EXTRA_PACKAGES" AUTOLOGIN="$AUTOLOGIN" AUTOSCALE_DISPLAY="$AUTOSCALE_DISPLAY" \
+            PKGLIST_DIR="/tmp/pkglists" \
             /bin/bash /tmp/desktop.sh 2>&1 | tee install-debug.log
 
       - name: Build NexWM

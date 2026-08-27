@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Hyggshi Welcome
-Comment=First-run setup assistant for Hyggshi OS
-Exec=/usr/bin/hyggshi-welcome
+Name[vi]=Chào mừng Hyggshi
+Comment=Cấu hình nhanh Hyggshi OS lần đầu sử dụng
+Exec=hyggshi-welcome
 Icon=hyggshi-welcome
 Terminal=false
-Categories=Settings;System;
-StartupNotify=true
+Categories=System;Settings;

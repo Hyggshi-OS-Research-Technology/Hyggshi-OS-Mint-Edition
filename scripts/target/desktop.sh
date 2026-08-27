@@ -14,6 +14,19 @@ source /tmp/kernel-tuning.sh
 : "${EDITION:=normal}"
 : "${AUTOLOGIN:=true}"
 : "${AUTOSCALE_DISPLAY:=true}"
+: "${PKGLIST_DIR:=/tmp/pkglists}"
+
+# Đọc danh sách gói từ file .list trong packages/packages/ (bỏ dòng trống
+# và dòng comment '#') — nguồn duy nhất cho các nhóm gói installer/devtools/
+# vietnamese-input/desktop-xfce, thay vì hardcode rải rác trong script này.
+read_pkglist() {
+  local file="$PKGLIST_DIR/$1"
+  if [ ! -f "$file" ]; then
+    echo "CẢNH BÁO: không tìm thấy package list '$file' (PKGLIST_DIR=$PKGLIST_DIR) — nhóm gói này sẽ bị BỎ QUA." >&2
+    return 0
+  fi
+  grep -v '^[[:space:]]*#' "$file" | grep -v '^[[:space:]]*$'
+}
 
 
 apt-get update
@@ -104,13 +117,14 @@ echo "grub-pc grub-pc/install_devices_disks_changed multiselect" | debconf-set-s
 #
 # efibootmgr cần cho nhánh UEFI ghi boot entry vào NVRAM; parted/dosfstools
 # cần cho module partition (tạo/format phân vùng ESP/root).
+# Nguồn danh sách gói: packages/packages/installer.list
 GRUB_INSTALL_FAILED=0
-for pkg in grub-pc grub-pc-bin grub-efi-amd64-bin grub-common efibootmgr parted dosfstools; do
+while IFS= read -r pkg; do
   if ! apt-get install -y "$pkg"; then
     echo "LỖI: cài gói '$pkg' thất bại (xem log apt ở trên để biết lý do — hết mạng, gói bị transition tạm thời, debconf chưa preseed đúng, v.v.)." >&2
     GRUB_INSTALL_FAILED=1
   fi
-done
+done < <(read_pkglist installer.list)
 if [ "$GRUB_INSTALL_FAILED" = "1" ]; then
   echo "LỖI NGHIÊM TRỌNG: thiếu ít nhất 1 gói GRUB/partition ở trên." >&2
   echo "Calamares bootloader/partition module CHẮC CHẮN sẽ lỗi khi cài đặt" >&2
@@ -628,8 +642,15 @@ EOF
 
   *)
     # mặc định: xfce
-    apt-get install -y task-xfce-desktop lightdm lightdm-gtk-greeter \
-      xfce4-whiskermenu-plugin git libgtk-3-bin x11-xserver-utils
+    # Nguồn danh sách gói: packages/packages/desktop-xfce.list
+    XFCE_PKGS="$(read_pkglist desktop-xfce.list | tr '\n' ' ')"
+    if [ -n "$XFCE_PKGS" ]; then
+      # shellcheck disable=SC2086
+      apt-get install -y $XFCE_PKGS
+    else
+      echo "LỖI: desktop-xfce.list rỗng hoặc không đọc được — không cài được desktop XFCE." >&2
+      exit 1
+    fi
 
     # icon theme theo lựa chọn
     case "$ICON_THEME" in
@@ -803,11 +824,12 @@ echo "===== Công cụ dev cơ bản (cmake, gcc) ====="
 # Cần để build các component C++ tự sinh trong repo ngay TRÊN máy đã cài
 # đặt (hyggshi-welcome — xem packages/hyggshi/hyggshi-welcome/,), không chỉ lúc build ISO trên CI. Best-effort (không
 # fatal): thiếu 1 trong 2 gói này không nên làm hỏng cả build ISO.
-for pkg in cmake gcc; do
+# Nguồn danh sách gói: packages/packages/devtools.list
+while IFS= read -r pkg; do
   if ! apt-get install -y "$pkg"; then
     echo "CẢNH BÁO: cài gói '$pkg' thất bại — không fatal, nhưng build C++ trên máy đích sẽ thiếu công cụ này." >&2
   fi
-done
+done < <(read_pkglist devtools.list)
 
 echo "===== Flatpak + Software Center (Flathub-only) ====="
 # Chỉ dùng Flathub trong Software. Debian trixie gnome-software vẫn có
@@ -890,11 +912,12 @@ if command -v curl >/dev/null 2>&1 && command -v gpg >/dev/null 2>&1; then
   fi
 fi
 
-for pkg in fcitx5 fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-qt5 fcitx5-unikey; do
+# Nguồn danh sách gói: packages/packages/vietnamese-input.list
+while IFS= read -r pkg; do
   if ! apt-get install -y "$pkg"; then
     echo "CẢNH BÁO: cài gói '$pkg' (Fcitx5) thất bại — bỏ qua gói này." >&2
   fi
-done
+done < <(read_pkglist vietnamese-input.list)
 
 if [ "$LOTUS_REPO_ADDED" = "1" ]; then
   if apt-get install -y fcitx5-lotus; then
